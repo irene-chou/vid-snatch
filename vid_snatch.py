@@ -9,6 +9,7 @@ from pathlib import Path
 
 DEFAULT_OUTPUT_DIR = Path("./output")
 DEMUCS_MODEL = "htdemucs"
+UNSAFE_FILENAME_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 
 YOUTUBE_PATTERNS = [
     r"(https?://)?(www\.)?youtube\.com/watch\?",
@@ -33,14 +34,50 @@ def validate_url(url: str) -> str:
     raise argparse.ArgumentTypeError(f"Not a valid YouTube URL: {url}")
 
 
-def download_audio(url: str, output_dir: Path, audio_format: str = "mp3") -> Path:
+def fetch_title(url: str) -> str:
+    """Fetch the video title from YouTube without downloading."""
+    import yt_dlp
+
+    ydl_opts = {
+        "quiet": True,
+        "no_warnings": True,
+        "skip_download": True,
+        "noplaylist": True,
+    }
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            return info.get("title", "video")
+    except yt_dlp.utils.DownloadError as e:
+        print(f"\nFailed to fetch video info: {e}")
+        sys.exit(1)
+
+
+def sanitize_filename(name: str) -> str:
+    """Remove characters that are unsafe for filenames."""
+    return UNSAFE_FILENAME_CHARS.sub("_", name).strip(". ")
+
+
+def prompt_filename(default_title: str) -> str:
+    """Ask the user for a filename, using the video title as default."""
+    safe_default = sanitize_filename(default_title)
+    print(f"\n檔名 (預設: {safe_default})")
+    user_input = input("輸入自訂檔名，或按 Enter 使用預設: ").strip()
+    if user_input:
+        return sanitize_filename(user_input)
+    return safe_default
+
+
+def download_audio(
+    url: str, output_dir: Path, filename: str, audio_format: str = "mp3",
+) -> Path:
     import yt_dlp
 
     ydl_opts = {
         "format": "bestaudio/best",
         "noplaylist": True,
         "paths": {"home": str(output_dir)},
-        "outtmpl": {"default": "%(title)s.%(ext)s"},
+        "outtmpl": {"default": f"{filename}.%(ext)s"},
         "postprocessors": [
             {
                 "key": "FFmpegExtractAudio",
@@ -54,23 +91,22 @@ def download_audio(url: str, output_dir: Path, audio_format: str = "mp3") -> Pat
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info)
-            audio_path = Path(filename).with_suffix(f".{audio_format}")
+            ydl.extract_info(url, download=True)
+            audio_path = output_dir / f"{filename}.{audio_format}"
             return audio_path
     except yt_dlp.utils.DownloadError as e:
         print(f"\nDownload failed: {e}")
         sys.exit(1)
 
 
-def download_video(url: str, output_dir: Path) -> Path:
+def download_video(url: str, output_dir: Path, filename: str) -> Path:
     import yt_dlp
 
     ydl_opts = {
         "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
         "noplaylist": True,
         "paths": {"home": str(output_dir)},
-        "outtmpl": {"default": "%(title)s.%(ext)s"},
+        "outtmpl": {"default": f"{filename}.%(ext)s"},
         "merge_output_format": "mp4",
         "quiet": False,
         "no_warnings": False,
@@ -78,9 +114,8 @@ def download_video(url: str, output_dir: Path) -> Path:
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info)
-            video_path = Path(filename).with_suffix(".mp4")
+            ydl.extract_info(url, download=True)
+            video_path = output_dir / f"{filename}.mp4"
             return video_path
     except yt_dlp.utils.DownloadError as e:
         print(f"\nDownload failed: {e}")
@@ -178,21 +213,28 @@ def main():
 
     args.output.mkdir(parents=True, exist_ok=True)
 
+    # Fetch video title and let user choose filename
+    print(f"正在取得影片資訊...")
+    title = fetch_title(args.url)
+    filename = prompt_filename(title)
+
     if args.video:
-        print(f"Downloading video from: {args.url}")
-        video_path = download_video(args.url, args.output)
+        print(f"\nDownloading video from: {args.url}")
+        video_path = download_video(args.url, args.output, filename)
         print(f"Done! Video saved: {video_path}")
     elif args.no_vocals:
-        print(f"Downloading audio from: {args.url}")
-        audio_path = download_audio(args.url, args.output, audio_format="wav")
+        print(f"\nDownloading audio from: {args.url}")
+        audio_path = download_audio(
+            args.url, args.output, filename, audio_format="wav",
+        )
         print(f"Downloaded: {audio_path}")
         result_path = remove_vocals(
             audio_path, args.output, keep_vocals=args.keep_vocals,
         )
         print(f"Instrumental saved: {result_path}")
     else:
-        print(f"Downloading audio from: {args.url}")
-        audio_path = download_audio(args.url, args.output)
+        print(f"\nDownloading audio from: {args.url}")
+        audio_path = download_audio(args.url, args.output, filename)
         print(f"Done! Audio saved: {audio_path}")
 
 

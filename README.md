@@ -13,16 +13,16 @@ Double-click `vid-snatch.command`.
 docker build -t vid-snatch .
 
 # Download audio (MP3)
-docker run --rm -v ~/Music/vid-snatch:/app/output vid-snatch "URL"
+docker run --rm -it -v ~/Music/vid-snatch:/app/output vid-snatch "URL"
 
 # Download audio + remove vocals
-docker run --rm -v ~/Music/vid-snatch:/app/output vid-snatch "URL" --no-vocals
+docker run --rm -it -v ~/Music/vid-snatch:/app/output vid-snatch "URL" --no-vocals
 
 # Download audio + keep both vocals and instrumental
-docker run --rm -v ~/Music/vid-snatch:/app/output vid-snatch "URL" --no-vocals --keep-vocals
+docker run --rm -it -v ~/Music/vid-snatch:/app/output vid-snatch "URL" --no-vocals --keep-vocals
 
 # Download video (MP4)
-docker run --rm -v ~/Music/vid-snatch:/app/output vid-snatch "URL" --video
+docker run --rm -it -v ~/Music/vid-snatch:/app/output vid-snatch "URL" --video
 ```
 
 Files are saved to `~/Music/vid-snatch/`.

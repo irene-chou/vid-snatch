@@ -72,7 +72,7 @@ while true; do
             [ "$choice" = "2" ] && echo "(去人聲需要 1-2 分鐘，請耐心等候)"
             echo ""
 
-            docker run --rm \
+            docker run --rm -it \
                 -v "$HOME/Music/vid-snatch:/app/output" \
                 vid-snatch "$url" "${cmd[@]}"
 
