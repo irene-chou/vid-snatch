@@ -25,7 +25,7 @@ docker run --rm -it -v ~/Music/vid-snatch:/app/output vid-snatch "URL" --no-voca
 docker run --rm -it -v ~/Music/vid-snatch:/app/output vid-snatch "URL" --video
 ```
 
-Files are saved to `~/Music/vid-snatch/`.
+Files are saved to `~/Music/vid-snatch/` by default. You can change the output path from the **Settings** menu (option 4) in `vid-snatch.command`. Settings are saved to `~/.config/vid-snatch/config`.
 
 ## Options
 

@@ -4,7 +4,30 @@
 
 cd "$(dirname "$0")"
 
-# 檢查 Docker
+# ── 設定檔 ──────────────────────────────────
+CONFIG_DIR="$HOME/.config/vid-snatch"
+CONFIG_FILE="$CONFIG_DIR/config"
+DEFAULT_OUTPUT_DIR="$HOME/Music/vid-snatch"
+
+load_config() {
+    OUTPUT_DIR="$DEFAULT_OUTPUT_DIR"
+    if [ -f "$CONFIG_FILE" ]; then
+        saved_dir=$(grep '^output_dir=' "$CONFIG_FILE" | cut -d'=' -f2-)
+        if [ -n "$saved_dir" ]; then
+            # 展開 ~ 為 $HOME
+            OUTPUT_DIR="${saved_dir/#\~/$HOME}"
+        fi
+    fi
+}
+
+save_config() {
+    mkdir -p "$CONFIG_DIR"
+    echo "output_dir=$1" > "$CONFIG_FILE"
+}
+
+load_config
+
+# ── 檢查 Docker ─────────────────────────────
 if ! command -v docker &> /dev/null; then
     echo "============================================"
     echo "  需要先安裝 Docker Desktop"
@@ -35,7 +58,7 @@ if ! docker image inspect vid-snatch &> /dev/null 2>&1; then
     echo "建置完成！"
 fi
 
-# 主迴圈
+# ── 主迴圈 ───────────────────────────────────
 while true; do
     echo ""
     echo "============================================"
@@ -45,10 +68,11 @@ while true; do
     echo "  1) 下載音檔 (MP3)"
     echo "  2) 下載音檔 + 去人聲 (MP3)"
     echo "  3) 下載影片 (MP4)"
-    echo "  4) 重新建置 (更新程式後使用)"
+    echo "  4) 設定"
+    echo "  5) 重新建置 (更新程式後使用)"
     echo "  q) 離開"
     echo ""
-    read -p "請選擇 [1/2/3/4/q]: " choice
+    read -p "請選擇 [1/2/3/4/5/q]: " choice
 
     case "$choice" in
         1|2|3)
@@ -59,6 +83,9 @@ while true; do
                 echo "網址不能為空！"
                 continue
             fi
+
+            # 確保輸出資料夾存在
+            mkdir -p "$OUTPUT_DIR"
 
             # 組裝指令
             cmd=()
@@ -73,19 +100,47 @@ while true; do
             echo ""
 
             docker run --rm -it \
-                -v "$HOME/Music/vid-snatch:/app/output" \
+                -v "$OUTPUT_DIR:/app/output" \
                 vid-snatch "$url" "${cmd[@]}"
 
             echo ""
             echo "============================================"
             echo "  完成！檔案已存到："
-            echo "  ~/Music/vid-snatch/"
+            echo "  $OUTPUT_DIR"
             echo "============================================"
 
             # 開啟資料夾
-            open "$HOME/Music/vid-snatch/" 2>/dev/null
+            open "$OUTPUT_DIR" 2>/dev/null
             ;;
         4)
+            echo ""
+            echo "============================================"
+            echo "  設定"
+            echo "============================================"
+            echo ""
+            echo "  目前儲存路徑: $OUTPUT_DIR"
+            echo ""
+            read -p "輸入新路徑（按 Enter 保持不變）: " new_dir
+
+            if [ -n "$new_dir" ]; then
+                # 展開 ~ 為 $HOME
+                new_dir="${new_dir/#\~/$HOME}"
+                mkdir -p "$new_dir" 2>/dev/null
+
+                if [ -d "$new_dir" ]; then
+                    save_config "$new_dir"
+                    OUTPUT_DIR="$new_dir"
+                    echo ""
+                    echo "  ✓ 路徑已更新為: $OUTPUT_DIR"
+                else
+                    echo ""
+                    echo "  ✗ 無法建立資料夾: $new_dir"
+                fi
+            else
+                echo "  路徑未變更。"
+            fi
+            ;;
+        5)
             echo ""
             echo "移除舊版本..."
             docker rmi vid-snatch 2>/dev/null
@@ -100,7 +155,7 @@ while true; do
             exit 0
             ;;
         *)
-            echo "無效選擇，請輸入 1、2、3、4 或 q"
+            echo "無效選擇，請輸入 1、2、3、4、5 或 q"
             ;;
     esac
 done
