@@ -4,7 +4,8 @@ Download YouTube audio/video and optionally remove vocals using Demucs.
 
 ## Quick Start
 
-Double-click `vid-snatch.command`.
+- **macOS** — Double-click `vid-snatch.command`
+- **Windows** — Double-click `vid-snatch.bat`
 
 ## Usage (Docker CLI)
 
@@ -25,7 +26,7 @@ docker run --rm -it -v ~/Music/vid-snatch:/app/output vid-snatch "URL" --no-voca
 docker run --rm -it -v ~/Music/vid-snatch:/app/output vid-snatch "URL" --video
 ```
 
-Files are saved to `~/Music/vid-snatch/` by default. You can change the output path from the **Settings** menu (option 4) in `vid-snatch.command`. Settings are saved to `~/.config/vid-snatch/config`.
+Files are saved to `~/Music/vid-snatch/` by default. You can change the output path from the **Settings** menu (option 4). Settings are saved to `~/.config/vid-snatch/config`.
 
 ## Options
 
