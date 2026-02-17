@@ -1,0 +1,9 @@
+venv/
+output/
+separated/
+__pycache__/
+*.egg-info/
+dist/
+build/
+.eggs/
+web_output/
