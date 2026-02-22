@@ -90,7 +90,7 @@ while true; do
             # 組裝指令
             cmd=()
             case "$choice" in
-                2) cmd+=("--no-vocals" "--keep-vocals") ;;
+                2) cmd+=("--no-vocals") ;;
                 3) cmd+=("--video") ;;
             esac
 

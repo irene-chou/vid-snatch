@@ -125,7 +125,6 @@ def download_video(url: str, output_dir: Path, filename: str) -> Path:
 def remove_vocals(
     audio_path: Path,
     output_dir: Path,
-    keep_vocals: bool,
 ) -> Path:
     import demucs.separate
 
@@ -159,15 +158,9 @@ def remove_vocals(
     # Demucs outputs to: _demucs_temp/htdemucs/<safe_name>/no_vocals.mp3
     demucs_out = demucs_dir / DEMUCS_MODEL / safe_name
     no_vocals_src = demucs_out / "no_vocals.mp3"
-    vocals_src = demucs_out / "vocals.mp3"
 
     no_vocals_dst = output_dir / f"{original_stem}_no_vocals.mp3"
     shutil.move(str(no_vocals_src), str(no_vocals_dst))
-
-    if keep_vocals and vocals_src.exists():
-        vocals_dst = output_dir / f"{original_stem}_vocals.mp3"
-        shutil.move(str(vocals_src), str(vocals_dst))
-        print(f"Vocals saved: {vocals_dst}")
 
     # Clean up
     shutil.rmtree(demucs_dir, ignore_errors=True)
@@ -197,10 +190,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="Download audio and remove vocals using Demucs",
     )
 
-    parser.add_argument(
-        "--keep-vocals", action="store_true",
-        help="When using --no-vocals, also save the isolated vocals track",
-    )
     return parser
 
 
@@ -228,9 +217,7 @@ def main():
             args.url, args.output, filename, audio_format="wav",
         )
         print(f"Downloaded: {audio_path}")
-        result_path = remove_vocals(
-            audio_path, args.output, keep_vocals=args.keep_vocals,
-        )
+        result_path = remove_vocals(audio_path, args.output)
         print(f"Instrumental saved: {result_path}")
     else:
         print(f"\nDownloading audio from: {args.url}")

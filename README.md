@@ -19,9 +19,6 @@ docker run --rm -it -v ~/Music/vid-snatch:/app/output vid-snatch "URL"
 # Download audio + remove vocals
 docker run --rm -it -v ~/Music/vid-snatch:/app/output vid-snatch "URL" --no-vocals
 
-# Download audio + keep both vocals and instrumental
-docker run --rm -it -v ~/Music/vid-snatch:/app/output vid-snatch "URL" --no-vocals --keep-vocals
-
 # Download video (MP4)
 docker run --rm -it -v ~/Music/vid-snatch:/app/output vid-snatch "URL" --video
 ```
@@ -35,6 +32,5 @@ Files are saved to `~/Music/vid-snatch/` by default. You can change the output p
 | `-o, --output` | Output directory (default: `./output`) |
 | `--video` | Download video (MP4) instead of audio |
 | `--no-vocals` | Remove vocals with Demucs |
-| `--keep-vocals` | Also save isolated vocals track |
 
 > First time running vocal removal will auto-download the Demucs model (~80MB).
