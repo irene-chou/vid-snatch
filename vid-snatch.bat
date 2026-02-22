@@ -99,7 +99,7 @@ if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%"
 
 :: 組裝指令
 set "cmd="
-if "%choice%"=="2" set "cmd=--no-vocals --keep-vocals"
+if "%choice%"=="2" set "cmd=--no-vocals"
 if "%choice%"=="3" set "cmd=--video"
 
 echo.
