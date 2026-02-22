@@ -67,10 +67,11 @@ echo   2) 下載音檔 + 去人聲 (MP3)
 echo   3) 下載影片 (MP4)
 echo   4) 設定
 echo   5) 重新建置 (更新程式後使用)
+echo   6) 解除安裝
 echo   q) 離開
 echo.
 set "choice="
-set /p "choice=請選擇 [1/2/3/4/5/q]: "
+set /p "choice=請選擇 [1/2/3/4/5/6/q]: "
 
 if "%choice%"=="q" goto quit
 if "%choice%"=="Q" goto quit
@@ -79,8 +80,9 @@ if "%choice%"=="2" goto download
 if "%choice%"=="3" goto download
 if "%choice%"=="4" goto settings
 if "%choice%"=="5" goto rebuild
+if "%choice%"=="6" goto uninstall
 
-echo 無效選擇，請輸入 1、2、3、4、5 或 q
+echo 無效選擇，請輸入 1、2、3、4、5、6 或 q
 goto menu
 
 :: ── 下載 ─────────────────────────────────────
@@ -162,6 +164,44 @@ docker build -t vid-snatch .
 echo.
 echo 建置完成！舊的暫存檔已清除。
 goto menu
+
+:: ── 解除安裝 ─────────────────────────────────
+:uninstall
+echo.
+echo ============================================
+echo   解除安裝 vid-snatch
+echo ============================================
+echo.
+set "confirm="
+set /p "confirm=確定要解除安裝嗎？(y/N): "
+if /i not "%confirm%"=="y" (
+    echo 已取消。
+    goto menu
+)
+
+echo.
+echo 移除 Docker 映像檔...
+docker rmi vid-snatch 2>nul
+docker builder prune -f 2>nul
+
+echo 移除設定檔...
+if exist "%CONFIG_DIR%" rmdir /s /q "%CONFIG_DIR%"
+
+set "del_output="
+set /p "del_output=是否也刪除已下載的檔案？(%OUTPUT_DIR%) (y/N): "
+if /i "%del_output%"=="y" (
+    if exist "%OUTPUT_DIR%" rmdir /s /q "%OUTPUT_DIR%"
+    echo 已刪除下載檔案。
+)
+
+echo.
+echo ============================================
+echo   解除安裝完成！
+echo   如需完全移除，可手動刪除此專案資料夾：
+echo   %~dp0
+echo ============================================
+pause
+exit /b 0
 
 :: ── 離開 ─────────────────────────────────────
 :quit
