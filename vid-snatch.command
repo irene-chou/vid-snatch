@@ -177,7 +177,7 @@ while true; do
             echo "移除設定檔..."
             rm -rf "$CONFIG_DIR"
 
-            read -p "是否也刪除已下載的檔案？($OUTPUT_DIR) (y/N): " del_output
+            read -p "是否也刪除您先前下載的音檔與影片？($OUTPUT_DIR) (y/N): " del_output
             if [ "$del_output" = "y" ] || [ "$del_output" = "Y" ]; then
                 rm -rf "$OUTPUT_DIR"
                 echo "已刪除下載檔案。"

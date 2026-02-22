@@ -195,7 +195,7 @@ echo 移除設定檔...
 if exist "%CONFIG_DIR%" rmdir /s /q "%CONFIG_DIR%"
 
 set "del_output="
-set /p "del_output=是否也刪除已下載的檔案？(%OUTPUT_DIR%) (y/N): "
+set /p "del_output=是否也刪除您先前下載的音檔與影片？(%OUTPUT_DIR%) (y/N): "
 if /i "%del_output%"=="y" (
     if exist "%OUTPUT_DIR%" rmdir /s /q "%OUTPUT_DIR%"
     echo 已刪除下載檔案。
