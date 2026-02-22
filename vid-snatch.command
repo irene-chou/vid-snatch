@@ -70,9 +70,10 @@ while true; do
     echo "  3) 下載影片 (MP4)"
     echo "  4) 設定"
     echo "  5) 重新建置 (更新程式後使用)"
+    echo "  6) 解除安裝"
     echo "  q) 離開"
     echo ""
-    read -p "請選擇 [1/2/3/4/5/q]: " choice
+    read -p "請選擇 [1/2/3/4/5/6/q]: " choice
 
     case "$choice" in
         1|2|3)
@@ -142,6 +143,12 @@ while true; do
             ;;
         5)
             echo ""
+            read -p "確定要重新建置嗎？這會需要 3-5 分鐘 [y/N]: " confirm
+            if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+                echo "已取消。"
+                continue
+            fi
+            echo ""
             echo "移除舊版本..."
             docker rmi vid-snatch 2>/dev/null
             docker builder prune -f 2>/dev/null
@@ -150,12 +157,46 @@ while true; do
             echo ""
             echo "建置完成！舊的暫存檔已清除。"
             ;;
+        6)
+            echo ""
+            echo "============================================"
+            echo "  解除安裝 vid-snatch"
+            echo "============================================"
+            echo ""
+            read -p "確定要解除安裝嗎？(y/N): " confirm
+            if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
+                echo "已取消。"
+                continue
+            fi
+
+            echo ""
+            echo "移除 Docker 映像檔..."
+            docker rmi vid-snatch 2>/dev/null
+            docker builder prune -f 2>/dev/null
+
+            echo "移除設定檔..."
+            rm -rf "$CONFIG_DIR"
+
+            read -p "是否也刪除您先前下載的音檔與影片？($OUTPUT_DIR) (y/N): " del_output
+            if [ "$del_output" = "y" ] || [ "$del_output" = "Y" ]; then
+                rm -rf "$OUTPUT_DIR"
+                echo "已刪除下載檔案。"
+            fi
+
+            echo ""
+            echo "============================================"
+            echo "  解除安裝完成！"
+            echo "  如需完全移除，可手動刪除此專案資料夾："
+            echo "  $(pwd)"
+            echo "============================================"
+            exit 0
+            ;;
         q|Q)
             echo "Bye!"
             exit 0
             ;;
         *)
-            echo "無效選擇，請輸入 1、2、3、4、5 或 q"
+            echo "無效選擇，請輸入 1、2、3、4、5、6 或 q"
             ;;
     esac
 done
