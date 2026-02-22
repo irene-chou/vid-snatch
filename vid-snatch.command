@@ -143,6 +143,12 @@ while true; do
             ;;
         5)
             echo ""
+            read -p "確定要重新建置嗎？這會需要 3-5 分鐘 [y/N]: " confirm
+            if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+                echo "已取消。"
+                continue
+            fi
+            echo ""
             echo "移除舊版本..."
             docker rmi vid-snatch 2>/dev/null
             docker builder prune -f 2>/dev/null

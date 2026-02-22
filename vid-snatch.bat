@@ -156,6 +156,13 @@ goto menu
 :: ── 重新建置 ─────────────────────────────────
 :rebuild
 echo.
+set "confirm="
+set /p "confirm=確定要重新建置嗎？這會需要 3-5 分鐘 [y/N]: "
+if /i not "%confirm%"=="y" (
+    echo 已取消。
+    goto menu
+)
+echo.
 echo 移除舊版本...
 docker rmi vid-snatch 2>nul
 docker builder prune -f 2>nul
