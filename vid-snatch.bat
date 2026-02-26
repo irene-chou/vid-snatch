@@ -63,7 +63,7 @@ echo   vid-snatch
 echo ============================================
 echo.
 echo   1) 下載音檔 (MP3)
-echo   2) 去人聲 (MP3)
+echo   2) 下載去人聲音檔 (MP3)
 echo   3) 下載影片 (MP4)
 echo   4) 設定
 echo   5) 重新建置 (更新程式後使用)
