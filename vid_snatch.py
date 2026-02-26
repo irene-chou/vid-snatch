@@ -187,7 +187,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     mode.add_argument(
         "--no-vocals", action="store_true",
-        help="Download audio and remove vocals using Demucs",
+        help="Remove vocals and keep instrumental only (Demucs)",
     )
 
     return parser
