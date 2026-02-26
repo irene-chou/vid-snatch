@@ -9,6 +9,8 @@ WORKDIR /app
 
 COPY pyproject.toml vid_snatch.py ./
 
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir \
+        torch torchaudio --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir .
 
 ENTRYPOINT ["vid-snatch"]
